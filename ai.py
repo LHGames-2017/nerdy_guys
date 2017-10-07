@@ -190,15 +190,14 @@ def bot():
         otherPlayers.append(player_info)
 
 
+
     printMap(deserialized_map)
     print "isAtHome ", isAtHome(player) == 0
     if isAtHome(player) == 0:
         print "OL", player.CarryingCapacity, player.Score
-        if player.CarryingCapacity == lvl_cap[lvl_cap.index(player.CarryingCapacity)] and player.Score >= lvl_price[lvl_cap.index(player.CarryingCapacity)]:
+        if player.CarryingCapacity == 1000 and player.Score >= 15000 :
             print "UPGRADE!!!"
-            lvl += 1
             return create_upgrade_action(UpgradeType.CarryingCapacity)
-
 
     # Find house and resource
     housePos = Point(-1, -1)
