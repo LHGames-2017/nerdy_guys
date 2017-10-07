@@ -9,12 +9,14 @@ def create_action(action_type, target):
     return json.dumps(actionContent.__dict__)
 
 def create_move_action(target):
+    print("Moving to: " + str(target))
     return create_action("MoveAction", target)
 
 def create_attack_action(target):
     return create_action("AttackAction", target)
 
 def create_collect_action(target):
+    print("Collecting: " + str(target))
     return create_action("CollectAction", target)
 
 def create_steal_action(target):
@@ -53,6 +55,25 @@ def printMap(map):
             print j,
         print()
 
+def isAWall(myMap, point):
+    for i in range(20):
+        for j in range(20):
+            tile = myMap[i][j]
+            if tile.X == point.X and tile.Y == point.Y:
+                return tile.Content != TileContent.Empty
+
+def moveTowardPos(myMap, currentPos, destPos):
+    distance = currentPos.Distance(currentPos, destPos);
+    if distance > 1:
+        if destPos.X < currentPos.X and not isAWall(myMap, Point(currentPos.X - 1, currentPos.Y)):
+            return create_move_action(Point(currentPos.X - 1, currentPos.Y))
+        if destPos.X > currentPos.X and not isAWall(myMap, Point(currentPos.X + 1, currentPos.Y)):
+            return create_move_action(Point(currentPos.X + 1, currentPos.Y))
+        if destPos.Y < currentPos.Y - 1 and not isAWall(myMap, Point(currentPos.X, currentPos.Y - 1)):
+            return create_move_action(Point(currentPos.X, currentPos.Y - 1))
+        if destPos.Y > currentPos.Y + 1 and not isAWall(myMap, Point(currentPos.X, currentPos.Y + 1)):
+            return create_move_action(Point(currentPos.X, currentPos.Y + 1))
+
 def bot():
     """
     Main de votre bot.
@@ -76,7 +97,7 @@ def bot():
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
 
-    otherPlayers = []
+    """otherPlayers = []
 
     for player_dict in map_json["OtherPlayers"]:
         for player_name in player_dict.keys():
@@ -87,12 +108,31 @@ def bot():
                                      Point(p_pos["X"], p_pos["Y"]))
 
             otherPlayers.append({player_name: player_info })
-            # print player.Position[0]
+            # print player.Position[0]"""
+    
 
+    #printMap(deserialized_map)
+    
+    # Find house and resource
+    housePos = Point(-1, -1)
+    resourcePos = Point(-1, -1)
+    for i in range(20):
+        for j in range(20):
+            tile = deserialized_map[i][j]
+            if tile.Content == TileContent.House:
+                housePos = Point(tile.X, tile.Y)
+            if tile.Content == TileContent.Resource:
+                resourcePos = Point(tile.X, tile.Y)
 
-    printMap(deserialized_map)
+    resDistance = resourcePos.Distance(player.Position, resourcePos);
+    print("Distance to res: " + str(resDistance))
+    print("Player pos: (" + str(player.Position.X) + ", " + str(player.Position.Y) + ")")
+    print("House pos: (" + str(housePos.X) + ", " + str(housePos.Y) + ")")
+    print("Res pos: (" + str(resourcePos.X) + ", " + str(resourcePos.Y) + ")")
+    print("Player carry: " + str(player.CarriedRessources))
 
-    return create_move_action(Point(25, 29))
+    # Move to res
+    return moveTowardPos(deserialized_map, player.Position, resourcePos)
 
 @app.route("/", methods=["POST"])
 def reponse():
