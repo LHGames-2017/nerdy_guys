@@ -1,4 +1,3 @@
-from __future__ import print_function
 from flask import Flask, request
 from structs import *
 import json
@@ -48,12 +47,11 @@ def deserialize_map(serialized_map):
 
     return deserialized_map
 
-def printMap(map, player):
+def printMap(map):
     for i in map:
         for j in i:
-            print(j,end=" ")
+            print j,
         print()
-    print("player", player.Position)
 
 def bot():
     """
@@ -92,7 +90,7 @@ def bot():
             # print player.Position[0]
 
 
-    printMap(deserialized_map, player)
+    printMap(deserialized_map)
 
     return create_move_action(Point(25, 29))
 
