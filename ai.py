@@ -9,6 +9,14 @@ def create_action(action_type, target):
     actionContent = ActionContent(action_type, target.__dict__)
     return json.dumps(actionContent.__dict__)
 
+def create_action_int(action_type, target):
+    actionContent = ActionContentInt(action_type, target)
+    return json.dumps(actionContent.__dict__)
+
+def create_action_int(action_type, target):
+    actionContent = ActionContentInt(action_type, target)
+    return json.dumps(actionContent.__dict__)
+
 def create_move_action(target):
     return create_action("MoveAction", target)
 
@@ -26,6 +34,9 @@ def create_heal_action():
 
 def create_purchase_action(item):
     return create_action("PurchaseAction", item)
+
+def create_upgrade_action():
+    return create_action_int("UpgradeAction", item)
 
 def deserialize_map(serialized_map):
     """
@@ -54,59 +65,32 @@ def printMap(map):
             print j,
         print()
 
-def moveLeft(player, map_):
-    p = Point(int(player.Position.X), int(player.Position.Y-1))
-    if isWayBlocked(p, map_):
-        return create_move_action(Point(int(player.Position.X-1), int(player.Position.Y)))
-    return create_move_action(p)
+def moveLeft(player):
+    return create_move_action(Point(int(player.Position.X), int(player.Position.Y-1)))
+def moveRight(player):
+    return create_move_action(Point(int(player.Position.X), int(player.Position.Y+1)))
+def moveUp(player):
+    return create_move_action(Point(int(player.Position.X-1), int(player.Position.Y)))
+def moveDown(player):
+    return create_move_action(Point(int(player.Position.X+1), int(player.Position.Y)))
 
-def moveRight(player, map_):
-    p = Point(int(player.Position.X), int(player.Position.Y+1))
-    if isWayBlocked(p, map_):
-        return create_move_action(Point(int(player.Position.X+1), int(player.Position.Y)))
-    return create_move_action(p)
-
-def moveUp(player, map_):
-    p = Point(int(player.Position.X-1), int(player.Position.Y))
-    if isWayBlocked(p, map_):
-        return create_move_action(Point(int(player.Position.X), int(player.Position.Y+1)))
-    return create_move_action(p)
-
-def moveDown(player, map_):
-    p = Point(int(player.Position.X+1), int(player.Position.Y))
-    isWayBlocked(p, map_)
-    if isWayBlocked(p, map_):
-        return create_move_action(Point(int(player.Position.X), int(player.Position.Y-1)))
-    return create_move_action(p)
-
-def goto(player, dest, map_):
+def goto(player, dest):
     current = player.Position
     if dest.X < current.X:
         print 1
-        return moveUp(player, map_)
+        return moveUp(player)
     elif dest.X > current.X:
         print 2
-        return moveDown(player, map_)
+        return moveDown(player)
     if dest.Y < current.Y:
         print 3
-        return moveLeft(player, map_)
+        return moveLeft(player)
     elif dest.Y > current.Y:
         print 4
-        return moveRight(player, map_)
+        return moveRight(player)
     print 5
     return create_move_action(Point(current.X, current.Y))
 
-
-def isWayBlocked(pos, map_):
-    for i in range(20):
-        for j in range(20):
-            tile = map_[i][j]
-            if tile.X == pos.X and tile.Y == pos.Y:
-                print "tile", map_[i][j]
-                print map_[i][j].Content == TileContent.Resource
-                if map_[i][j].Content == TileContent.Resource or map_[i][j].Content == TileContent.Wall:
-                    return True
-    return False
 
 def doCollect(player, dest):
     current = player.Position
@@ -122,14 +106,29 @@ def doCollect(player, dest):
 def isAtHome(player):
     return player.Position.Distance(player.Position, player.HouseLocation)
 
-def fct(player, dest, map_):
+def findAdjacentWall(pos, myMap):
+    adjacentWallPos = (-1, -1)
+    for i in range(20):
+        for j in range(20):
+            tile = myMap[i][j]
+            if tile.Content == TileContent.Wall:
+                if pos.Distance(pos, Point(tile.X, tile.Y)) == 1:
+                    adjacentWallPos = Point(tile.X, tile.Y)
+                    return adjacentWallPos
+    return adjacentWallPos
+    
+def fct(player, dest, myMap):
     current = player.Position
     distance = current.Distance(current, dest);
+
+    adjacentWall = findAdjacentWall(player.Position, myMap)
+    if adjacentWall != Point(-1, -1):
+        return create_attack_action(adjacentWall)
     if player.CarriedRessources != 0 and isAtHome(player) == 0:
         return create_move_action(player.Position)
     if distance > 1 or (distance > 0 and player.CarriedRessources == player.CarryingCapacity):
         print "goto"
-        return goto(player, dest, map_)
+        return goto(player, dest)
     elif distance > 0:
         print "collect"
         return doCollect(player, dest)
@@ -148,7 +147,7 @@ def bot():
     encoded_map = map_json.encode()
     map_json = json.loads(encoded_map)
     p = map_json["Player"]
-    print "player:{}".format(p)
+    #print "player:{}".format(p)
     pos = p["Position"]
     x = pos["X"]
     y = pos["Y"]
@@ -172,7 +171,9 @@ def bot():
 
         otherPlayers.append(player_info)
 
-    printMap(deserialized_map)
+    #printMap(deserialized_map)
+    print("Score: " + str(player.Score))
+    print("Pos: " + str(player.Position))
 
     # Find house and resource
     housePos = Point(-1, -1)
