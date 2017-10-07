@@ -57,7 +57,7 @@ class Tile(object):
         self.Y = y
     def __str__(self):
         return str(self.Content)
-        return str(self.X) + " " + str(self.Y) + " " + str(self.Content)
+        return "(" + str(self.X) + " " + str(self.Y) + ") " + str(self.Content) 
 
 
 class Player(object):

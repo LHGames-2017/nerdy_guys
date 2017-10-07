@@ -53,6 +53,19 @@ def printMap(map):
             print j,
         print()
 
+
+def moveLeft(player):
+    print int(player.Position.X)
+    print int(player.Position.Y-1)
+    return Point(int(player.Position.X), int(player.Position.Y-1))
+def moveRight(player):
+    return Point(int(player.Position.X), int(player.Position.Y+1))
+def moveUp(player):
+    return Point(int(player.Position.X-1), int(player.Position.Y))
+def moveDown(player):
+    return Point(int(player.Position.X+1), int(player.Position.Y))
+
+
 def bot():
     """
     Main de votre bot.
@@ -76,23 +89,26 @@ def bot():
     serialized_map = map_json["CustomSerializedMap"]
     deserialized_map = deserialize_map(serialized_map)
 
-    otherPlayers = []
-
-    for player_dict in map_json["OtherPlayers"]:
-        for player_name in player_dict.keys():
-            player_info = player_dict[player_name]
-            p_pos = player_info["Position"]
-            player_info = PlayerInfo(player_info["Health"],
-                                     player_info["MaxHealth"],
-                                     Point(p_pos["X"], p_pos["Y"]))
-
-            otherPlayers.append({player_name: player_info })
+    # otherPlayers = []
+    #
+    # for player_dict in map_json["OtherPlayers"]:
+    #     for player_name in player_dict.keys():
+    #         player_info = player_dict[player_name]
+    #         p_pos = player_info["Position"]
+    #         player_info = PlayerInfo(player_info["Health"],
+    #                                  player_info["MaxHealth"],
+    #                                  Point(p_pos["X"], p_pos["Y"]))
+    #
+    #         otherPlayers.append({player_name: player_info })
             # print player.Position[0]
 
 
+    print "Player",player.Position
     printMap(deserialized_map)
+    newP = moveDown(player)
+    print newP
 
-    return create_move_action(Point(25, 29))
+    return create_move_action(newP)
 
 @app.route("/", methods=["POST"])
 def reponse():
