@@ -132,7 +132,7 @@ def findAdjacentWall(pos, myMap):
                     adjacentWallPos = Point(tile.X, tile.Y)
                     return adjacentWallPos
     return adjacentWallPos
-    
+
 def fct(player, dest, myMap):
     current = player.Position
     distance = current.Distance(current, dest);
