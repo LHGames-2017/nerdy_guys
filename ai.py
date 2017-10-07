@@ -123,7 +123,7 @@ def isAtHome(player):
     return player.Position.Distance(player.Position, player.HouseLocation)
 
 def findAdjacentWall(pos, myMap):
-    adjacentWallPos = (-1, -1)
+    adjacentWallPos = Point(-1, -1)
     for i in range(20):
         for j in range(20):
             tile = myMap[i][j]
@@ -132,7 +132,7 @@ def findAdjacentWall(pos, myMap):
                     adjacentWallPos = Point(tile.X, tile.Y)
                     return adjacentWallPos
     return adjacentWallPos
-    
+
 def fct(player, dest, myMap):
     current = player.Position
     distance = current.Distance(current, dest);
