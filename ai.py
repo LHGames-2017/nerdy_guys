@@ -54,32 +54,59 @@ def printMap(map):
             print j,
         print()
 
-def moveLeft(player):
-    return create_move_action(Point(int(player.Position.X), int(player.Position.Y-1)))
-def moveRight(player):
-    return create_move_action(Point(int(player.Position.X), int(player.Position.Y+1)))
-def moveUp(player):
-    return create_move_action(Point(int(player.Position.X-1), int(player.Position.Y)))
-def moveDown(player):
-    return create_move_action(Point(int(player.Position.X+1), int(player.Position.Y)))
+def moveLeft(player, map_):
+    p = Point(int(player.Position.X), int(player.Position.Y-1))
+    if isWayBlocked(p, map_):
+        return create_move_action(Point(int(player.Position.X-1), int(player.Position.Y)))
+    return create_move_action(p)
 
-def goto(player, dest):
+def moveRight(player, map_):
+    p = Point(int(player.Position.X), int(player.Position.Y+1))
+    if isWayBlocked(p, map_):
+        return create_move_action(Point(int(player.Position.X+1), int(player.Position.Y)))
+    return create_move_action(p)
+
+def moveUp(player, map_):
+    p = Point(int(player.Position.X-1), int(player.Position.Y))
+    if isWayBlocked(p, map_):
+        return create_move_action(Point(int(player.Position.X), int(player.Position.Y+1)))
+    return create_move_action(p)
+
+def moveDown(player, map_):
+    p = Point(int(player.Position.X+1), int(player.Position.Y))
+    isWayBlocked(p, map_)
+    if isWayBlocked(p, map_):
+        return create_move_action(Point(int(player.Position.X), int(player.Position.Y-1)))
+    return create_move_action(p)
+
+def goto(player, dest, map_):
     current = player.Position
     if dest.X < current.X:
         print 1
-        return moveUp(player)
+        return moveUp(player, map_)
     elif dest.X > current.X:
         print 2
-        return moveDown(player)
+        return moveDown(player, map_)
     if dest.Y < current.Y:
         print 3
-        return moveLeft(player)
+        return moveLeft(player, map_)
     elif dest.Y > current.Y:
         print 4
-        return moveRight(player)
+        return moveRight(player, map_)
     print 5
     return create_move_action(Point(current.X, current.Y))
 
+
+def isWayBlocked(pos, map_):
+    for i in range(20):
+        for j in range(20):
+            tile = map_[i][j]
+            if tile.X == pos.X and tile.Y == pos.Y:
+                print "tile", map_[i][j]
+                print map_[i][j].Content == TileContent.Resource
+                if map_[i][j].Content == TileContent.Resource or map_[i][j].Content == TileContent.Wall:
+                    return True
+    return False
 
 def doCollect(player, dest):
     current = player.Position
@@ -95,14 +122,14 @@ def doCollect(player, dest):
 def isAtHome(player):
     return player.Position.Distance(player.Position, player.HouseLocation)
 
-def fct(player, dest):
+def fct(player, dest, map_):
     current = player.Position
     distance = current.Distance(current, dest);
     if player.CarriedRessources != 0 and isAtHome(player) == 0:
         return create_move_action(player.Position)
     if distance > 1 or (distance > 0 and player.CarriedRessources == player.CarryingCapacity):
         print "goto"
-        return goto(player, dest)
+        return goto(player, dest, map_)
     elif distance > 0:
         print "collect"
         return doCollect(player, dest)
@@ -161,7 +188,7 @@ def bot():
         dest = housePos
     else:
         dest = resourcePos
-    action = fct(player, dest)
+    action = fct(player, dest, deserialized_map)
     print "action",action
     # return decision
     return action
