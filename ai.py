@@ -27,6 +27,11 @@ def create_heal_action():
 def create_purchase_action(item):
     return create_action("PurchaseAction", item)
 
+def create_upgrade_action(item):
+    # return create_action("UpgradeAction", item)
+    actionContent = ActionContentInt("UpgradeAction", item)
+    return json.dumps(actionContent.__dict__)
+
 def deserialize_map(serialized_map):
     """
     Fonction utilitaire pour comprendre la map
@@ -104,7 +109,7 @@ def isWayBlocked(pos, map_):
             if tile.X == pos.X and tile.Y == pos.Y:
                 print "tile", map_[i][j]
                 print map_[i][j].Content == TileContent.Resource
-                if map_[i][j].Content == TileContent.Resource or map_[i][j].Content == TileContent.Wall:
+                if map_[i][j].Content == TileContent.Resource or map_[i][j].Content == TileContent.Wall or map_[i][j].Content == TileContent.Lava:
                     return True
     return False
 
@@ -136,11 +141,13 @@ def fct(player, dest, map_):
 
 
 
-
 def bot():
     """
     Main de votre bot.
     """
+    lvl_price = [15000, 50000, 100000, 250000, 500000]
+    lvl_cap = [1000, 1500, 2500, 5000, 10000, 25000 ]
+
     map_json = request.form["map"]
 
     # Player info
@@ -173,6 +180,13 @@ def bot():
         otherPlayers.append(player_info)
 
     printMap(deserialized_map)
+    print "isAtHome ", isAtHome(player) == 0
+    if isAtHome(player) == 0:
+        print "OL", player.CarryingCapacity, player.Score
+        if player.CarryingCapacity == lvl_cap[lvl_cap.index(player.CarryingCapacity)] and player.Score >= lvl_price[lvl_cap.index(player.CarryingCapacity)]:
+            print "UPGRADE!!!"
+            lvl += 1
+            return create_upgrade_action(UpgradeType.CarryingCapacity)
 
     # Find house and resource
     housePos = Point(-1, -1)
