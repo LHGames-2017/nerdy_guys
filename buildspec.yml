@@ -7,7 +7,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - docker build -t gcr.io/lhgames-2017/nerdy_guys .
+      - docker build -t $docker_image$ .
   post_build:
     commands:
-      - docker push gcr.io/lhgames-2017/nerdy_guys
+      - docker push $docker_image$
