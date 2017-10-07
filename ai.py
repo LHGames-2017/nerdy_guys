@@ -74,6 +74,17 @@ def moveTowardPos(myMap, currentPos, destPos):
         if destPos.Y > currentPos.Y + 1 and not isAWall(myMap, Point(currentPos.X, currentPos.Y + 1)):
             return create_move_action(Point(currentPos.X, currentPos.Y + 1))
 
+def moveLeft(player):
+    print int(player.Position.X)
+    print int(player.Position.Y-1)
+    return Point(int(player.Position.X), int(player.Position.Y-1))
+def moveRight(player):
+    return Point(int(player.Position.X), int(player.Position.Y+1))
+def moveUp(player):
+    return Point(int(player.Position.X-1), int(player.Position.Y))
+def moveDown(player):
+    return Point(int(player.Position.X+1), int(player.Position.Y))
+
 def bot():
     """
     Main de votre bot.
