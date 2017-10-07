@@ -140,15 +140,17 @@ def fct(player, dest, myMap):
     adjacentWall = findAdjacentWall(player.Position, myMap)
     if adjacentWall.X != -1:
         return create_attack_action(adjacentWall)
-    if player.CarriedRessources != 0 and isAtHome(player) == 0:
-        return create_move_action(player.Position)
     if distance > 1 or (distance > 0 and player.CarriedRessources == player.CarryingCapacity):
+
         print "goto"
         return goto(player, dest)
     elif distance > 0:
         print "collect"
         return doCollect(player, dest)
 
+    if player.CarriedRessources != 0 and isAtHome(player) == 0:
+        print "oo", player.Position
+        return create_move_action(player.Position)
 
 
 def bot():
@@ -194,11 +196,13 @@ def bot():
     printMap(deserialized_map)
     print "isAtHome ", isAtHome(player) == 0
     if isAtHome(player) == 0:
+
         print "OL", player.CarryingCapacity, player.Score
         if player.CarryingCapacity == 1000 and player.Score >= 15000 :
             print "UPGRADE!!!"
             return create_upgrade_action(UpgradeType.CarryingCapacity)
-
+    print "---**-*/-*"
+    print player.CarryingCapacity, player.CarriedRessources
     # Find house and resource
     housePos = Point(-1, -1)
     resourcePos = Point(-1, -1)
@@ -209,10 +213,12 @@ def bot():
                 housePos = Point(tile.X, tile.Y)
             if tile.Content == TileContent.Resource:
                 resourcePos = Point(tile.X, tile.Y)
-    if player.CarriedRessources ==  player.CarryingCapacity:
+    print "--**//////",not (isAtHome(player) == 0)
+    if player.CarriedRessources ==  player.CarryingCapacity and not (isAtHome(player) == 0):
         dest = housePos
     else:
         dest = resourcePos
+        print "~~~~"
     action = fct(player, dest, deserialized_map)
     print "action",action
     # return decision
@@ -226,4 +232,4 @@ def reponse():
     return bot()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)
