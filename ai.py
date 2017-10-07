@@ -1,8 +1,8 @@
+from __future__ import print_function
 from flask import Flask, request
 from structs import *
 import json
 import numpy
-
 app = Flask(__name__)
 
 def create_action(action_type, target):
@@ -34,7 +34,7 @@ def deserialize_map(serialized_map):
     serialized_map = serialized_map[1:]
     rows = serialized_map.split('[')
     column = rows[0].split('{')
-    deserialized_map = [[Tile() for x in range(40)] for y in range(40)]
+    deserialized_map = [[Tile() for x in range(20)] for y in range(20)]
     for i in range(len(rows) - 1):
         column = rows[i + 1].split('{')
 
@@ -47,6 +47,13 @@ def deserialize_map(serialized_map):
             deserialized_map[i][j] = Tile(content, x, y)
 
     return deserialized_map
+
+def printMap(map, player):
+    for i in map:
+        for j in i:
+            print(j,end=" ")
+        print()
+    print("player", player.Position)
 
 def bot():
     """
@@ -82,9 +89,12 @@ def bot():
                                      Point(p_pos["X"], p_pos["Y"]))
 
             otherPlayers.append({player_name: player_info })
+            # print player.Position[0]
 
-    # return decision
-    return create_move_action(Point(0,1))
+
+    printMap(deserialized_map, player)
+
+    return create_move_action(Point(25, 29))
 
 @app.route("/", methods=["POST"])
 def reponse():
@@ -94,4 +104,4 @@ def reponse():
     return bot()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=8080)
