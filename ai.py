@@ -151,7 +151,7 @@ def run(player, dest, myMap):
     elif distance > 0:
         return doCollect(player, dest)
 
-    # avoid crash, but should never be reached
+    # return move action on the player position to avoid crash, but should never be reached
     if player.CarriedRessources != 0 and isAtHome(player) == 0:
         return create_move_action(player.Position)
 
@@ -160,6 +160,8 @@ def bot():
     """
     Main de votre bot.
     """
+
+    # upgrade prices and capacity
     lvl_price = [15000, 50000, 100000, 250000, 500000]
     lvl_cap = [1000, 1500, 2500, 5000, 10000, 25000 ]
 
@@ -194,9 +196,9 @@ def bot():
 
         otherPlayers.append(player_info)
 
-
-
+    # print the map
     printMap(deserialized_map)
+
     # If at home and enough Score => update
     if isAtHome(player) == 0 and lvl_price[lvl_cap.index(player.CarryingCapacity)] <= player.Score:
         return create_upgrade_action(UpgradeType.CarryingCapacity)
