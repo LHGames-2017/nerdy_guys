@@ -195,7 +195,7 @@ def bot():
                                      Point(p_pos["X"], p_pos["Y"]))
 
         otherPlayers.append(player_info)
-
+    # ============================================================================================
     # print the map
     printMap(deserialized_map)
 
@@ -214,7 +214,7 @@ def bot():
             if tile.Content == TileContent.Resource:
                 resourcePos = Point(tile.X, tile.Y)
 
-    # If Player CarryingCapacity is full and player not at house, go back to houes
+    # If Player CarryingCapacity is full and player not at house, go back to house
     if player.CarriedRessources ==  player.CarryingCapacity and not (isAtHome(player) == 0):
         dest = housePos
     # else go to resource
