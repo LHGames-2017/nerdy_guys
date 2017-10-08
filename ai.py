@@ -36,11 +36,8 @@ def create_purchase_action(item):
     return create_action("PurchaseAction", item)
 
 
-def create_upgrade_action():
-    return create_action_int("UpgradeAction", item)
-
+# fix UpgradeAction, with Int
 def create_upgrade_action(item):
-    # return create_action("UpgradeAction", item)
     actionContent = ActionContentInt("UpgradeAction", item)
     return json.dumps(actionContent.__dict__)
 
@@ -65,12 +62,14 @@ def deserialize_map(serialized_map):
 
     return deserialized_map
 
+# show the map
 def printMap(map):
     for i in map:
         for j in i:
             print j,
         print()
 
+# Moving function
 def moveLeft(player):
     return create_move_action(Point(int(player.Position.X), int(player.Position.Y-1)))
 def moveRight(player):
@@ -80,34 +79,32 @@ def moveUp(player):
 def moveDown(player):
     return create_move_action(Point(int(player.Position.X+1), int(player.Position.Y)))
 
+
+# Move to destination
 def goto(player, dest):
     current = player.Position
     if dest.X < current.X:
-        print 1
         return moveUp(player)
     elif dest.X > current.X:
-        print 2
         return moveDown(player)
     if dest.Y < current.Y:
-        print 3
         return moveLeft(player)
     elif dest.Y > current.Y:
-        print 4
         return moveRight(player)
-    print 5
+    # no move
     return create_move_action(Point(current.X, current.Y))
 
+# Check if the way if blocked (Resource, Wall, Lava)
 def isWayBlocked(pos, map_):
     for i in range(20):
         for j in range(20):
             tile = map_[i][j]
             if tile.X == pos.X and tile.Y == pos.Y:
-                print "tile", map_[i][j]
-                print map_[i][j].Content == TileContent.Resource
                 if map_[i][j].Content == TileContent.Resource or map_[i][j].Content == TileContent.Wall or map_[i][j].Content == TileContent.Lava:
                     return True
     return False
 
+# Collect Resource from an adjacent tile
 def doCollect(player, dest):
     current = player.Position
     if dest.X < current.X:
@@ -119,9 +116,11 @@ def doCollect(player, dest):
     else:
         return create_collect_action(Point(current.X, current.Y + 1))
 
+# Check if player is at home
 def isAtHome(player):
     return player.Position.Distance(player.Position, player.HouseLocation)
 
+# Check if a Wall is adjacent to the player, and attack it if it's the case
 def findAdjacentWall(pos, myMap):
     adjacentWallPos = Point(-1, -1)
     for i in range(20):
@@ -133,23 +132,27 @@ def findAdjacentWall(pos, myMap):
                     return adjacentWallPos
     return adjacentWallPos
 
-def fct(player, dest, myMap):
+ # main fucntion for our IA
+def run(player, dest, myMap):
+    # compute distance between current and destination tile
     current = player.Position
     distance = current.Distance(current, dest);
 
+    # Highest priority
+    # if there is an adjacent Wall, attack it
     adjacentWall = findAdjacentWall(player.Position, myMap)
     if adjacentWall.X != -1:
         return create_attack_action(adjacentWall)
-    if distance > 1 or (distance > 0 and player.CarriedRessources == player.CarryingCapacity):
 
-        print "goto"
+    # Case the player hould move
+    if distance > 1 or (distance > 0 and player.CarriedRessources == player.CarryingCapacity):
         return goto(player, dest)
+    # Case the player should collect resource
     elif distance > 0:
-        print "collect"
         return doCollect(player, dest)
 
+    # avoid crash, but should never be reached
     if player.CarriedRessources != 0 and isAtHome(player) == 0:
-        print "oo", player.Position
         return create_move_action(player.Position)
 
 
@@ -194,15 +197,10 @@ def bot():
 
 
     printMap(deserialized_map)
-    print "isAtHome ", isAtHome(player) == 0
-    if isAtHome(player) == 0:
+    # If at home and enough Score => update
+    if isAtHome(player) == 0 and lvl_price[lvl_cap.index(player.CarryingCapacity)] <= player.Score:
+        return create_upgrade_action(UpgradeType.CarryingCapacity)
 
-        print "OL", player.CarryingCapacity, player.Score
-        if player.CarryingCapacity == 1000 and player.Score >= 15000 :
-            print "UPGRADE!!!"
-            return create_upgrade_action(UpgradeType.CarryingCapacity)
-    print "---**-*/-*"
-    print player.CarryingCapacity, player.CarriedRessources
     # Find house and resource
     housePos = Point(-1, -1)
     resourcePos = Point(-1, -1)
@@ -213,14 +211,17 @@ def bot():
                 housePos = Point(tile.X, tile.Y)
             if tile.Content == TileContent.Resource:
                 resourcePos = Point(tile.X, tile.Y)
-    print "--**//////",not (isAtHome(player) == 0)
+
+    # If Player CarryingCapacity is full and player not at house, go back to houes
     if player.CarriedRessources ==  player.CarryingCapacity and not (isAtHome(player) == 0):
         dest = housePos
+    # else go to resource
     else:
         dest = resourcePos
-        print "~~~~"
-    action = fct(player, dest, deserialized_map)
-    print "action",action
+
+    # get the action
+    action = run(player, dest, deserialized_map)
+
     # return decision
     return action
 

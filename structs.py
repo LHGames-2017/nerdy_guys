@@ -57,7 +57,6 @@ class Tile(object):
         self.Y = y
     def __str__(self):
         return str(self.Content)
-        return "(" + str(self.X) + " " + str(self.Y) + ") " + str(self.Content)
 
 
 class Player(object):
@@ -86,6 +85,7 @@ class ActionContent(object):
         self.ActionName = action_name
         self.Content = str(content)
 
+# Fiw UpgradeAction with Int
 class ActionContentInt(object):
 
     def __init__(self, action_name, content):
